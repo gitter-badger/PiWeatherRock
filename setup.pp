@@ -83,10 +83,9 @@ vcsrepo { '/home/pi/PiWeatherRock':
 }
 
 python::requirements { '/home/pi/PiWeatherRock/requirements.txt':
-  virtualenv   => '/home/pi/PiWeatherRock',
   pip_provider => 'pip3',
-  owner        => 'pi',
-  group        => 'pi',
+  owner        => 'root',
+  group        => 'root',
   cwd          => '/home/pi/PiWeatherRock',
   require      => [
     Package[ $main_packages, $piweatherrock_packages, ],
