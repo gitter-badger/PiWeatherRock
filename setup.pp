@@ -9,7 +9,6 @@ $main_packages = [
   'git',
   'libgl1-mesa-dri',
   'lightdm',
-  'realvnc-vnc-server',
   'tmux',
   'x11-xserver-utils',
   'xserver-xorg',
@@ -32,6 +31,22 @@ package { [ $main_packages, $piweatherrock_packages, ]:
   install_options => [
     '--no-install-recommends',
   ],
+}
+
+unless $facts['os']['hardware'] == 'x86_64' {
+  $non_x86_packages = [ 'realvnc-vnc-server', ]
+  package { $non_x86_packages:
+    ensure          => latest,
+    install_options => [
+      '--no-install-recommends',
+    ],
+  }
+
+  service { 'vncserver-x11-serviced':
+    ensure  => running,
+    enable  => true,
+    require => Package['realvnc-vnc-server'],
+  }
 }
 
 # if using Raspbian Lite uncomment the bit below for a minimal desktop and terminal
@@ -68,12 +83,6 @@ exec { 'enable display-setup-script':
   path    => '/bin:/usr/bin',
   command => "sed -i 's|#display-setup-script=|display-setup-script=/home/pi/bin/xhost.sh|' /etc/lightdm/lightdm.conf",
   unless  => "grep -e '^display-setup-script' /etc/lightdm/lightdm.conf",
-}
-
-service { 'vncserver-x11-serviced':
-  ensure  => running,
-  enable  => true,
-  require => Package[$main_packages],
 }
 
 vcsrepo { '/home/pi/PiWeatherRock':
